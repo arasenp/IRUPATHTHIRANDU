@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>22 Months, Our Story</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Jost:wght@200;300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#07070a;
+    --ink:#0e0d12;
+    --champagne:#d9b98c;
+    --champagne-soft:#e8d3ad;
+    --ivory:#f3ead9;
+    --blush:#e9b9bd;
+    --rosegold:#c98a90;
+    --gold-glow: rgba(217,185,140,0.55);
+    --serif: 'Cormorant Garamond', serif;
+    --sans: 'Jost', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; width:100%; height:100%;
+    background:var(--black); color:var(--ivory);
+    font-family:var(--sans);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{position:fixed; inset:0; overflow:hidden;}
+
+  canvas#bg-canvas{position:fixed; inset:0; width:100%; height:100%; z-index:0;}
+  canvas#fx-canvas{position:fixed; inset:0; width:100%; height:100%; z-index:50; pointer-events:none;}
+
+  .scene{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; visibility:hidden;
+    transition:opacity 1.8s ease, visibility 1.8s ease;
+    z-index:5; text-align:center; padding:6vw;
+  }
+  .scene.active{opacity:1; visibility:visible; z-index:10;}
+
+  /* ---------- INTRO ---------- */
+  #scene-intro{ }
+  .intro-line{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size:clamp(1.1rem, 2.6vw, 2rem);
+    color:var(--champagne-soft);
+    max-width:720px; line-height:1.7;
+    letter-spacing:0.02em;
+    opacity:0.95;
+    min-height:3em;
+  }
+  .cursor{display:inline-block; width:2px; background:var(--champagne-soft); margin-left:2px; animation:blink 0.9s steps(2) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- PASSWORD ---------- */
+  #scene-password .glass{
+    backdrop-filter: blur(18px);
+    background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border:1px solid rgba(217,185,140,0.35);
+    border-radius:22px;
+    padding:3.2rem 3rem;
+    max-width:440px;
+    box-shadow: 0 0 60px rgba(217,185,140,0.12), inset 0 0 40px rgba(255,255,255,0.03);
+    position:relative;
+  }
+  .lock-label{
+    font-family:var(--sans); font-weight:300; letter-spacing:0.35em;
+    font-size:0.7rem; text-transform:uppercase; color:var(--champagne);
+    margin-bottom:1.4rem;
+  }
+  .lock-hint{
+    font-family:var(--serif); font-style:italic; font-size:1.35rem;
+    color:var(--blush); margin-bottom:2.2rem; letter-spacing:0.02em;
+  }
+  #pw-dots{
+    display:flex; gap:16px; justify-content:center; margin-bottom:1.8rem;
+  }
+  .pw-dot{
+    width:16px; height:16px; border-radius:50%;
+    border:1px solid rgba(217,185,140,0.5);
+    background:transparent; transition:all 0.35s ease;
+    position:relative;
+  }
+  .pw-dot.filled{ background:var(--champagne); box-shadow:0 0 16px var(--gold-glow); }
+  #pw-input{
+    position:absolute; opacity:0; width:100%; height:100%; inset:0; cursor:pointer;
+  }
+  .pw-wrap{position:relative; height:16px;}
+  .unlock-msg{
+    font-family:var(--serif); font-style:italic; color:var(--champagne-soft);
+    font-size:0.95rem; min-height:1.6em; opacity:0.85;
+  }
+  .shake{ animation: shakeit 0.5s; }
+  @keyframes shakeit{
+    10%,90%{transform:translateX(-2px);} 20%,80%{transform:translateX(4px);}
+    30%,50%,70%{transform:translateX(-8px);} 40%,60%{transform:translateX(8px);}
+  }
+  #tap-fallback{
+    margin-top:1.6rem; font-family:var(--sans); letter-spacing:0.2em; font-size:0.72rem;
+    text-transform:uppercase; color:var(--champagne); cursor:pointer;
+    border:1px solid rgba(217,185,140,0.4); border-radius:30px; padding:0.7rem 1.6rem;
+    display:inline-block; background:transparent; transition:all .3s;
+  }
+  #tap-fallback:hover{background:rgba(217,185,140,0.12);}
+
+  /* ---------- TITLE REVEAL ---------- */
+  #scene-title{ background: radial-gradient(ellipse at center, rgba(217,185,140,0.08), transparent 60%);}
+  .title-main{
+    font-family:var(--serif); font-weight:500; letter-spacing:0.02em;
+    font-size:clamp(2.2rem, 6vw, 4.6rem); color:var(--ivory);
+    text-shadow:0 0 40px var(--gold-glow);
+  }
+  .title-sub{
+    font-family:var(--serif); font-style:italic; font-size:clamp(1.1rem,2.2vw,1.6rem);
+    color:var(--rosegold); margin-top:0.8rem; letter-spacing:0.04em;
+  }
+
+  /* ---------- PHOTO SCENES ---------- */
+  .photo-scene{ flex-direction:column; gap:2rem; }
+  .photo-frame{
+    position:relative; width:min(60vw, 420px); aspect-ratio:4/5;
+    background: linear-gradient(155deg, #1a1712, #0c0a08);
+    border:8px solid #f7f2e7; border-bottom-width:38px;
+    box-shadow:0 30px 70px rgba(0,0,0,0.6), 0 0 50px var(--gold-glow);
+    transform: rotate(var(--tilt, -2deg));
+  }
+  .photo-frame img{width:100%; height:100%; object-fit:cover; display:block;}
+  .photo-frame .ph-placeholder{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--serif); font-style:italic; color:rgba(243,234,217,0.35); font-size:1.1rem;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(217,185,140,0.18), transparent 55%),
+      radial-gradient(circle at 70% 80%, rgba(233,185,189,0.14), transparent 55%),
+      #14110d;
+  }
+  .caption-text{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size:clamp(1.1rem, 2.2vw, 1.7rem); color:var(--champagne-soft);
+    max-width:600px; letter-spacing:0.01em; line-height:1.6;
+    text-shadow:0 0 30px rgba(0,0,0,0.6);
+  }
+
+  /* ---------- POEM SCENES ---------- */
+  .poem-scene .poem-text{
+    font-family:var(--serif); font-style:italic; font-weight:400;
+    font-size:clamp(1.15rem, 2vw, 1.55rem); line-height:2; color:var(--ivory);
+    max-width:760px; white-space:pre-wrap;
+  }
+  .poem-heading{
+    font-family:var(--sans); letter-spacing:0.35em; text-transform:uppercase;
+    font-size:0.72rem; color:var(--champagne); margin-bottom:1.6rem;
+  }
+
+  /* ---------- DISTANCE / HEARTBEAT SCENE ---------- */
+  #scene-distance svg{ width:min(80vw,720px); height:auto; }
+  .distance-label{ font-family:var(--sans); letter-spacing:0.3em; font-size:0.68rem;
+    text-transform:uppercase; color:var(--champagne-soft); }
+  .distance-wrap{ display:flex; flex-direction:column; align-items:center; gap:1.4rem; }
+  .distance-caption{ font-family:var(--serif); font-style:italic; color:var(--blush); font-size:1.2rem; max-width:520px;}
+
+  /* ---------- CONSTELLATION ---------- */
+  #scene-constellation svg{ width:min(70vw,560px); height:auto; }
+
+  /* ---------- FINAL ACT ---------- */
+  #scene-final .final-heart{ font-size:3rem; filter:drop-shadow(0 0 30px var(--gold-glow)); animation: pulseHeart 2.4s ease-in-out infinite; }
+  @keyframes pulseHeart{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+  #scene-final .final-letter{
+    font-family:var(--serif); font-style:italic; font-size:clamp(1.1rem,2vw,1.5rem);
+    color:var(--ivory); max-width:720px; line-height:1.95; margin-top:1.6rem;
+  }
+
+  /* ---------- ENDLESS SCENE ---------- */
+  #scene-forever{}
+  .forever-gallery{
+    position:absolute; inset:0; pointer-events:none;
+  }
+  .forever-frame{
+    position:absolute; width:90px; height:112px; border:5px solid rgba(247,242,231,0.85);
+    border-bottom-width:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    opacity:0.85; animation: driftFrame 14s ease-in-out infinite;
+  }
+  .forever-frame img{width:100%; height:100%; object-fit:cover; display:block;}
+  .forever-frame .ph-placeholder{width:100%;height:100%; background:#14110d;}
+  @keyframes driftFrame{ 0%,100%{ transform:translateY(0px) rotate(var(--r,0deg)); } 50%{ transform:translateY(-16px) rotate(var(--r,0deg)); } }
+  .final-line{
+    font-family:var(--serif); font-style:italic; font-weight:500;
+    font-size:clamp(1.3rem, 3vw, 2.1rem); color:var(--champagne-soft);
+    text-shadow:0 0 40px var(--gold-glow); z-index:2; position:relative;
+    letter-spacing:0.02em;
+  }
+
+  /* progress + reader-controlled navigation */
+  #progress-rail{
+    position:fixed; bottom:84px; left:50%; transform:translateX(-50%);
+    display:flex; gap:6px; z-index:60; opacity:0.55;
+    max-width:min(86vw, 560px); flex-wrap:wrap; justify-content:center;
+  }
+  #progress-rail span{ width:5px; height:5px; border-radius:50%; background:rgba(217,185,140,0.3); transition:all .4s; }
+  #progress-rail span.done{ background:var(--champagne); box-shadow:0 0 8px var(--gold-glow); }
+  #progress-rail span.current{ transform:scale(1.8); background:var(--blush); }
+
+  #story-controls{
+    position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+    z-index:70; display:none; align-items:center; gap:12px;
+    padding:8px 10px; border-radius:999px;
+    background:rgba(7,7,10,0.58); border:1px solid rgba(217,185,140,0.25);
+    backdrop-filter:blur(14px); box-shadow:0 10px 35px rgba(0,0,0,0.35);
+  }
+  #story-controls.visible{display:flex;}
+  .story-nav{
+    min-width:108px; border:1px solid rgba(217,185,140,0.45); border-radius:999px;
+    padding:0.72rem 1.25rem; background:rgba(217,185,140,0.08); color:var(--ivory);
+    font-family:var(--sans); font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase;
+    cursor:pointer; transition:background .3s, transform .3s, opacity .3s;
+  }
+  .story-nav:hover:not(:disabled){background:rgba(217,185,140,0.18); transform:translateY(-1px);}
+  .story-nav:disabled{opacity:0.28; cursor:not-allowed;}
+  #scene-counter{min-width:58px; color:var(--champagne-soft); font-size:0.68rem; letter-spacing:0.12em;}
+
+  @media (max-width:600px){
+    .scene{padding:7vw 6vw 16vh; overflow-y:auto; align-items:flex-start; padding-top:10vh;}
+    .story-nav{min-width:90px; padding:0.68rem 0.9rem;}
+    #sound-badge{top:12px; right:12px;}
+  }
+
+  #sound-badge{
+    position:fixed; top:20px; right:20px; z-index:60; font-family:var(--sans);
+    font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:var(--champagne);
+    opacity:0.6; border:1px solid rgba(217,185,140,0.3); padding:6px 12px; border-radius:20px;
+  }
+  #yt-holder{ position:fixed; width:2px; height:2px; opacity:0; pointer-events:none; bottom:0; right:0; }
+
+
+  /* =========================================================
+     RESPONSIVE READING LAYOUT, keeps all content visible
+  ========================================================= */
+  :root{
+    --top-safe:72px;
+    --bottom-safe:118px;
+  }
+
+  .scene{
+    padding:var(--top-safe) clamp(18px, 5vw, 72px) var(--bottom-safe);
+    overflow:hidden;
+    align-items:center;
+  }
+
+  /* Long-form scenes use a contained, scrollable reading card. */
+  .poem-scene > div,
+  #scene-final > div{
+    width:min(900px, 100%);
+    max-height:calc(100dvh - var(--top-safe) - var(--bottom-safe));
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:clamp(24px, 4vw, 48px);
+    border:1px solid rgba(217,185,140,0.22);
+    border-radius:24px;
+    background:linear-gradient(160deg, rgba(14,13,18,0.88), rgba(7,7,10,0.72));
+    box-shadow:0 24px 70px rgba(0,0,0,0.45), inset 0 0 45px rgba(255,255,255,0.018);
+    backdrop-filter:blur(16px);
+    scrollbar-width:thin;
+    scrollbar-color:rgba(217,185,140,0.65) rgba(255,255,255,0.05);
+    overscroll-behavior:contain;
+  }
+
+  .poem-scene > div::-webkit-scrollbar,
+  #scene-final > div::-webkit-scrollbar{width:8px;}
+  .poem-scene > div::-webkit-scrollbar-track,
+  #scene-final > div::-webkit-scrollbar-track{background:rgba(255,255,255,0.04); border-radius:20px;}
+  .poem-scene > div::-webkit-scrollbar-thumb,
+  #scene-final > div::-webkit-scrollbar-thumb{background:rgba(217,185,140,0.55); border-radius:20px;}
+
+  .poem-scene .poem-text,
+  #scene-final .final-letter{
+    width:100%;
+    max-width:780px;
+    margin-left:auto;
+    margin-right:auto;
+    font-size:clamp(1.05rem, 1.7vw, 1.35rem);
+    line-height:1.85;
+    text-align:left;
+    white-space:pre-wrap;
+  }
+
+  .poem-heading{
+    position:sticky;
+    top:0;
+    z-index:2;
+    width:fit-content;
+    margin:0 auto 1.6rem;
+    padding:0.55rem 1rem;
+    border-radius:999px;
+    background:rgba(7,7,10,0.88);
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+  }
+
+  #scene-final .final-heart{
+    position:sticky;
+    top:0;
+    z-index:2;
+    width:fit-content;
+    margin:0 auto 1rem;
+    padding:0.25rem 1rem;
+    background:rgba(7,7,10,0.82);
+    border-radius:999px;
+  }
+
+  /* Photos scale to the available height rather than slipping behind controls. */
+  .photo-scene{
+    gap:clamp(1rem, 2.5vh, 2rem);
+  }
+  .photo-frame{
+    width:min(52vw, 390px);
+    max-height:calc(100dvh - var(--top-safe) - var(--bottom-safe) - 110px);
+  }
+  .caption-text{max-width:720px;}
+
+  #scene-distance .distance-wrap,
+  #scene-constellation > div,
+  #scene-title > div,
+  #scene-intro > div,
+  #scene-password > div{
+    max-height:calc(100dvh - var(--top-safe) - var(--bottom-safe));
+  }
+
+  #scene-forever{
+    flex-direction:column;
+    gap:1rem;
+  }
+
+  /* Progress lives at the top; controls get their own footer zone. */
+  #progress-rail{
+    top:24px;
+    bottom:auto;
+    max-width:min(72vw, 620px);
+  }
+
+  #story-controls{
+    bottom:max(16px, env(safe-area-inset-bottom));
+    width:min(94vw, 470px);
+    justify-content:center;
+  }
+
+  @media (max-width:700px){
+    :root{
+      --top-safe:64px;
+      --bottom-safe:104px;
+    }
+
+    .scene{
+      padding:var(--top-safe) 16px var(--bottom-safe);
+      align-items:center;
+      overflow:hidden;
+    }
+
+    .poem-scene > div,
+    #scene-final > div{
+      max-height:calc(100dvh - var(--top-safe) - var(--bottom-safe));
+      padding:22px 18px 34px;
+      border-radius:18px;
+    }
+
+    .poem-scene .poem-text,
+    #scene-final .final-letter{
+      font-size:clamp(1rem, 4.4vw, 1.16rem);
+      line-height:1.72;
+    }
+
+    .poem-heading{
+      max-width:100%;
+      letter-spacing:0.2em;
+      font-size:0.62rem;
+      line-height:1.5;
+    }
+
+    .photo-frame{
+      width:min(76vw, 330px);
+      max-height:calc(100dvh - var(--top-safe) - var(--bottom-safe) - 125px);
+    }
+
+    .caption-text{
+      font-size:clamp(1rem, 4.6vw, 1.25rem);
+      line-height:1.45;
+    }
+
+    #story-controls{
+      gap:7px;
+      padding:7px;
+    }
+    .story-nav{
+      min-width:0;
+      flex:1;
+      padding:0.7rem 0.55rem;
+      letter-spacing:0.1em;
+      font-size:0.62rem;
+    }
+    #scene-counter{
+      min-width:48px;
+      font-size:0.62rem;
+    }
+
+    #sound-badge{
+      display:none;
+    }
+  }
+
+  @media (max-height:650px){
+    :root{
+      --top-safe:52px;
+      --bottom-safe:88px;
+    }
+    #progress-rail{top:14px;}
+    #story-controls{bottom:8px;}
+    .photo-frame{width:min(42vh, 300px);}
+    .poem-scene > div,
+    #scene-final > div{padding-top:18px; padding-bottom:24px;}
+  }
+
+
+  /* ---------- ROMANTIC ENHANCEMENTS ---------- */
+  .distance-map-card{
+    width:min(900px,100%); padding:clamp(20px,4vw,42px); border-radius:28px;
+    border:1px solid rgba(217,185,140,.25);
+    background:linear-gradient(160deg,rgba(14,13,18,.88),rgba(7,7,10,.72));
+    box-shadow:0 24px 80px rgba(0,0,0,.45),0 0 60px rgba(217,185,140,.08);
+    overflow:hidden;
+  }
+  #scene-distance svg{width:min(84vw,780px); overflow:visible; filter:drop-shadow(0 0 20px rgba(217,185,140,.15));}
+  .country-name{font:500 16px var(--serif); fill:var(--ivory); letter-spacing:.04em;}
+  .country-sub{font:300 10px var(--sans); fill:var(--champagne); letter-spacing:.18em; text-transform:uppercase;}
+  #flight-path{stroke-linecap:round;}
+  #plane-group{opacity:0; filter:drop-shadow(0 0 7px rgba(243,234,217,.7));}
+  #plane-icon{font-size:26px; fill:var(--ivory);}
+  #heartbeat-line{stroke-linecap:round; stroke-linejoin:round; filter:drop-shadow(0 0 8px rgba(233,185,189,.75));}
+  #heart-core{transform-box:fill-box; transform-origin:center; animation:heartCore 1.15s ease-in-out infinite;}
+  #heart-ring{transform-box:fill-box; transform-origin:center; animation:heartRing 1.15s ease-out infinite;}
+  @keyframes heartCore{0%,100%{transform:scale(.92)} 18%{transform:scale(1.22)} 34%{transform:scale(.96)} 48%{transform:scale(1.12)} 70%{transform:scale(.94)}}
+  @keyframes heartRing{0%{transform:scale(.5);opacity:.9} 85%,100%{transform:scale(2.2);opacity:0}}
+  .distance-caption strong{color:var(--champagne-soft); font-weight:500;}
+
+  .interlude-scene{flex-direction:column;}
+  .interlude-card{
+    position:relative; width:min(800px,100%); padding:clamp(30px,6vw,68px);
+    border:1px solid rgba(217,185,140,.22); border-radius:30px;
+    background:radial-gradient(circle at 50% 0%,rgba(233,185,189,.12),transparent 42%),rgba(10,9,13,.72);
+    box-shadow:0 28px 80px rgba(0,0,0,.46); overflow:hidden;
+  }
+  .interlude-kicker{font:300 .65rem var(--sans); letter-spacing:.35em; text-transform:uppercase; color:var(--champagne); margin-bottom:1.3rem;}
+  .interlude-text{font:italic 500 clamp(1.35rem,3.2vw,2.35rem)/1.45 var(--serif); color:var(--ivory); text-shadow:0 0 30px rgba(217,185,140,.16);}
+  .interlude-note{margin-top:1.2rem; font:italic 400 clamp(1rem,1.8vw,1.2rem)/1.6 var(--serif); color:var(--blush);}
+  .floating-kiss{position:absolute; font-size:clamp(1.2rem,3vw,2rem); opacity:.62; animation:kissFloat 5s ease-in-out infinite;}
+  @keyframes kissFloat{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-14px) rotate(9deg)}}
+  .orbit-wrap{position:absolute; inset:0; pointer-events:none;}
+  .orbit-heart{position:absolute; left:50%; top:50%; font-size:18px; color:var(--blush); animation:orbitHeart 9s linear infinite; transform-origin:0 0;}
+  @keyframes orbitHeart{from{transform:rotate(0deg) translateX(150px) rotate(0deg)}to{transform:rotate(360deg) translateX(150px) rotate(-360deg)}}
+  .love-meter{width:min(420px,80%); height:8px; margin:1.6rem auto 0; border-radius:99px; background:rgba(255,255,255,.07); overflow:hidden;}
+  .love-meter span{display:block; height:100%; width:0; border-radius:inherit; background:linear-gradient(90deg,var(--rosegold),var(--champagne-soft)); box-shadow:0 0 18px var(--gold-glow); transition:width 2.4s cubic-bezier(.22,1,.36,1);}
+  .interlude-scene.active .love-meter span{width:100%;}
+
+  .constellation-caption{margin-top:1rem;}
+  .const-twinkle{animation:constTwinkle 1.8s ease-in-out infinite alternate;}
+  @keyframes constTwinkle{from{opacity:.35}to{opacity:1}}
+
+  #opening-heart-word{
+    position:fixed; left:50%; top:50%; transform:translate(-50%,-50%) scale(.5);
+    z-index:55; opacity:0; pointer-events:none; font:italic 600 clamp(2rem,7vw,5.8rem) var(--serif);
+    color:var(--ivory); text-shadow:0 0 24px var(--blush),0 0 70px var(--gold-glow);
+  }
+  #opening-heart-word.show{animation:openingLove 2.4s ease forwards;}
+  @keyframes openingLove{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}28%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}70%{opacity:1}100%{opacity:0;transform:translate(-50%,-56%) scale(1.18)}}
+
+  @media(max-width:700px){
+    .distance-map-card{padding:18px 12px 24px;border-radius:20px;}
+    #scene-distance svg{width:94vw;}
+    .country-name{font-size:14px}.country-sub{font-size:8px}
+    .interlude-card{padding:34px 22px; border-radius:22px;}
+    .orbit-heart{animation-name:orbitHeartMobile;}
+    @keyframes orbitHeartMobile{from{transform:rotate(0deg) translateX(105px) rotate(0deg)}to{transform:rotate(360deg) translateX(105px) rotate(-360deg)}}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001s !important; transition-duration:0.001s !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="fx-canvas"></canvas>
+  <div id="opening-heart-word">You. Me. Always.</div>
+
+  <!-- INTRO -->
+  <div class="scene active" id="scene-intro">
+    <div class="intro-line" id="intro-text"></div>
+  </div>
+
+  <!-- PASSWORD -->
+  <div class="scene" id="scene-password">
+    <div class="glass">
+      <div class="lock-label">This story is locked</div>
+      <div class="lock-hint">Two birthdays. One destiny.</div>
+      <div class="pw-wrap">
+        <input id="pw-input" type="tel" inputmode="numeric" maxlength="4" autocomplete="off">
+        <div id="pw-dots">
+          <div class="pw-dot"></div><div class="pw-dot"></div><div class="pw-dot"></div><div class="pw-dot"></div>
+        </div>
+      </div>
+      <div class="unlock-msg" id="unlock-msg">&nbsp;</div>
+      <div id="tap-fallback" style="display:none;">Tap to begin our story</div>
+    </div>
+  </div>
+
+  <!-- TITLE REVEAL -->
+  <div class="scene" id="scene-title">
+    <div>
+      <div class="title-main">Happy 22nd Month, My Chellam</div>
+      <div class="title-sub">Twenty two months of choosing you, missing you, desiring you, and loving you more deeply than the day before.</div>
+    </div>
+  </div>
+
+  <!-- PHOTO SCENES x11 will be injected by JS -->
+  <div id="photo-scene-holder"></div>
+
+  <div id="interlude-scene-holder"></div>
+
+  <!-- POEM 1 -->
+  <div class="scene poem-scene" id="scene-poem1">
+    <div>
+      <div class="poem-heading">A Letter, First</div>
+      <div class="poem-text" id="poem1-text"></div>
+    </div>
+  </div>
+
+  <!-- DISTANCE VISUAL -->
+  <div class="scene" id="scene-distance">
+    <div class="distance-map-card distance-wrap">
+      <div class="distance-label">Mauritius to Switzerland</div>
+      <svg viewBox="0 0 700 270" aria-label="Animated route between Mauritius and Switzerland">
+        <defs>
+          <linearGradient id="routeGlow" x1="0" x2="1"><stop stop-color="#e9b9bd"/><stop offset=".5" stop-color="#f3ead9"/><stop offset="1" stop-color="#d9b98c"/></linearGradient>
+          <path id="flight-path" d="M105,176 Q350,24 595,176"/>
+        </defs>
+        <circle cx="105" cy="176" r="26" fill="rgba(233,185,189,.09)" stroke="rgba(233,185,189,.28)"/>
+        <circle id="pt-a" cx="105" cy="176" r="7" fill="#e9b9bd"/>
+        <text class="country-name" x="105" y="215" text-anchor="middle">Mauritius</text>
+        <text class="country-sub" x="105" y="232" text-anchor="middle">where my night begins</text>
+        <circle cx="595" cy="176" r="26" fill="rgba(217,185,140,.09)" stroke="rgba(217,185,140,.28)"/>
+        <circle id="pt-b" cx="595" cy="176" r="7" fill="#d9b98c"/>
+        <text class="country-name" x="595" y="215" text-anchor="middle">Switzerland</text>
+        <text class="country-sub" x="595" y="232" text-anchor="middle">where your morning waits</text>
+        <path id="dist-line" d="M105,176 Q350,24 595,176" stroke="url(#routeGlow)" stroke-width="2.2" fill="none" stroke-dasharray="760" stroke-dashoffset="760" opacity=".78"/>
+        <g id="plane-group">
+          <text id="plane-icon" text-anchor="middle" dominant-baseline="middle">✈</text>
+        </g>
+        <g transform="translate(350 91)">
+          <circle id="heart-ring" r="18" fill="none" stroke="#e9b9bd" stroke-width="2" opacity=".7"/>
+          <path id="heart-core" d="M0,11 C-19,-2 -11,-20 0,-10 C11,-20 19,-2 0,11Z" fill="#e9b9bd"/>
+          <path id="heartbeat-line" d="M-95,0 H-44 L-30,-18 L-15,20 L2,-28 L18,0 H95" fill="none" stroke="#e9b9bd" stroke-width="3" stroke-dasharray="250" stroke-dashoffset="250"/>
+        </g>
+      </svg>
+      <div class="distance-caption"><strong>Nine thousand kilometres</strong>, one little plane, two hearts refusing to feel far away, and one heartbeat that keeps finding its way home.</div>
+    </div>
+  </div>
+
+  <!-- POEM 2 -->
+  <div class="scene poem-scene" id="scene-poem2">
+    <div>
+      <div class="poem-heading">What The Distance Taught Us</div>
+      <div class="poem-text" id="poem2-text"></div>
+    </div>
+  </div>
+
+  <!-- CONSTELLATION -->
+  <div class="scene" id="scene-constellation">
+    <div>
+      <svg viewBox="0 0 400 400" id="const-svg"></svg>
+      <div class="distance-caption constellation-caption" style="margin-top:1rem;">Even the stars know what my heart already does. Every path keeps leading me back to you.</div>
+    </div>
+  </div>
+
+  <!-- POEM 3 (gratitude / resilience) -->
+  <div class="scene poem-scene" id="scene-poem3">
+    <div>
+      <div class="poem-heading">For The Months We Missed</div>
+      <div class="poem-text" id="poem3-text"></div>
+    </div>
+  </div>
+
+  <!-- FINAL LETTER -->
+  <div class="scene" id="scene-final">
+    <div>
+      <div class="final-heart">♥</div>
+      <div class="final-letter" id="final-letter-text"></div>
+    </div>
+  </div>
+
+  <!-- FOREVER / RESTING SCENE -->
+  <div class="scene" id="scene-forever">
+    <div class="forever-gallery" id="forever-gallery"></div>
+    <div class="final-line">I loved you yesterday. I love you more today.</div>
+    <div class="final-line">Tomorrow, my heart will find another impossible way to love you deeper.</div>
+    <div class="final-line">Happy 22nd Month, My Chellam</div>
+    <div class="final-line">My Caramel Princess, My Favourite Forever ❤️</div>
+  </div>
+
+  <div id="progress-rail"></div>
+  <div id="story-controls" aria-label="Story navigation">
+    <button class="story-nav" id="prev-btn" type="button">← Previous</button>
+    <div id="scene-counter">1 / 1</div>
+    <button class="story-nav" id="next-btn" type="button">Next →</button>
+  </div>
+  <div id="sound-badge">♪ our song is playing softly</div>
+  <div id="yt-holder"><div id="yt-player"></div></div>
+  <audio id="fallback-audio" loop preload="none">
+    <source src="song.mp3" type="audio/mpeg">
+  </audio>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG
+========================================================= */
+const PASSWORD = "0425";
+const YT_VIDEO_ID = "VHsJCGh4gr4"; // kwn - Worst Behaviour (Official Video) ft. Kehlani
+const PHOTO_COUNT = 11;
+const CAPTIONS = [
+  "I used to think home was a place. Then you came into my life, and suddenly home had your eyes, your laugh, your voice, and the way you say my name.",
+  "Every kilometre between us has only made one thing clearer. My heart does not know how to move away from you. It only knows how to reach for you harder.",
+  "You are the reason my midnight in Mauritius feels less lonely, because somewhere in Switzerland, my favourite person is waking beneath the same sky.",
+  "This is more than a photograph. It is proof that for one beautiful moment, time stood still just to let me look at you a little longer.",
+  "I find you everywhere now. In songs I replay, in coffee growing cold, in quiet roads, in every soft moment that makes me wish you were beside me.",
+  "Twenty two months later, and you still have the power to make my heart forget how to behave. One look from you, and I am yours all over again.",
+  "The ocean can make all the noise it wants. It still cannot drown out the way my whole soul answers whenever it hears your name.",
+  "You are my favourite unfinished sentence, because loving you keeps giving me new words, new dreams, and new reasons to stay.",
+  "Somewhere between your mornings and my nights, we built a secret little world where your voice feels like touch and missing you feels almost like fire.",
+  "This is what my love looks like when nobody is watching. Quiet, stubborn, loyal, a little obsessed, and completely yours.",
+  "It was never only distance. It was you and me looking at every difficult day and still whispering the same answer. Us. Again. Always."
+];
+
+const INTERLUDES = [
+  {id:'tease1', kicker:'A dangerous little truth', text:'You have no idea how quickly my innocent thoughts stop being innocent when you look at me like that.', note:'Actually, maybe you know exactly what you are doing, and that is the problem.', effect:'kisses'},
+  {id:'play1', kicker:'A very serious complaint', text:'Your pillow gets far too much access to you for something that has never once earned it.', note:'I am jealous, offended, and fully prepared to replace it.', effect:'orbit'},
+  {id:'sensual1', kicker:'When the night gets quiet', text:'Some nights I do not only miss your voice. I miss your warmth, your breath near me, and the feeling of having nowhere else to be but against you.', note:'Distance becomes very unfair when my whole body remembers you.', effect:'meter'},
+  {id:'tease2', kicker:'Let us settle this properly', text:'You are adorable when you argue, but I still think one long kiss would be a much better use of that mouth.', note:'I am willing to test this theory repeatedly.', effect:'kisses'},
+  {id:'soft1', kicker:'The life I actually want', text:'I want the sleepy version of you, the dramatic version, the stubborn version, the quiet version, and the version that steals all the blanket.', note:'Not only your best moments. I want every beautifully unedited part of you.', effect:'orbit'},
+  {id:'sensual2', kicker:'The first moment there is no distance', text:'I will hold you so close that every missed hug, every unfinished kiss, and every lonely night finally understands why we waited.', note:'And when I finally have you in my arms, letting go will not be part of the plan.', effect:'meter'},
+  {id:'tease3', kicker:'One more confession', text:'I love making you smile, but I also love that tiny second when my words make you shy and you pretend they did not.', note:'Chellam, your blush has never fooled me.', effect:'kisses'},
+  {id:'sensual3', kicker:'A thought I should probably behave about', text:'I imagine pulling you closer by the waist, looking into your eyes, and taking my time with the kiss we have been owed for far too long.', note:'Slow enough to remember. Deep enough to make the distance jealous.', effect:'meter'},
+  {id:'play2', kicker:'Future household problem', text:'I already know we will argue about who loves whom more, and I already know I will win by distracting you with kisses.', note:'This is not cheating. This is strategy.', effect:'orbit'},
+  {id:'vow1', kicker:'What my heart keeps saying', text:'You are not a chapter I want to finish. You are the person I want beside me while the whole story is still being written.', note:'Page after page, year after year, still you.', effect:'orbit'}
+];
+
+const POEM_1 =
+`Before the photographs, before the months, before every beautiful word I could try to give you,
+there is one truth I need you to feel.
+You are not simply someone I love.
+You are the place inside me where love finally learned how to stay.
+
+Somewhere between Mauritius, warm with salt, rain, and sugarcane,
+and Switzerland, wrapped in cold mornings and quiet mountains,
+life placed an ocean between two people who only wanted to be close.
+But my heart has never understood maps.
+It does not see borders, flights, clocks, or kilometres.
+It only knows that when the day becomes heavy, it searches for you.
+
+There were evenings stolen by deadlines,
+mornings where one of us was waking while the other was already exhausted,
+and calls we wanted to make but did not have the strength to hold.
+There were moments when I missed you so much that even saying it felt too small.
+Because how do I explain that I did not only miss your presence?
+I missed your warmth.
+I missed the peace that comes over me when I know you are near.
+I missed the way my whole world feels softer when I hear your voice.
+
+And still, not one difficult day was powerful enough to make me stop choosing you.
+I kept returning to you the way the sea returns to the shore.
+Not because it is easy.
+Not because it is expected.
+But because something this deep does not know how to become anything less.`;
+
+const POEM_2 =
+`People say distance makes the heart grow fonder, but fondness is far too gentle a word for what you do to me.
+Distance made my heart restless for you.
+It taught me how one voice note could warm an entire night,
+how one photograph could make me smile and ache at the same time,
+and how your sleepy voice could feel more intimate than any room full of people.
+
+I learned the different sounds of your silence.
+The silence that means you are tired.
+The silence that means something is on your mind.
+The silence that quietly asks me to stay, even when neither of us knows what to say.
+And I stayed, because loving you has never depended on perfect conversations.
+Sometimes it is simply my heart sitting beside yours from nine thousand kilometres away.
+
+Distance made me notice everything.
+The way you type when you are excited.
+The little attitude in your voice when you know you are right.
+The softness that appears when you are trying not to show how much you care.
+The way you can make me feel wanted without touching me,
+and somehow make me crave your touch even more.
+
+We did not only survive the months apart.
+We turned longing into loyalty.
+We turned waiting into intimacy.
+We turned two different time zones into one love that refused to sleep.`;
+
+const POEM_3 =
+`We did not celebrate every month the way I wish we had.
+Some passed quietly beneath work, exhaustion, responsibilities, and days that asked too much from us.
+For those moments, I am sorry.
+Not because our love disappeared, but because something as precious as you deserves to be reminded how deeply it is treasured.
+
+Yet even in the months without flowers, long messages, or perfect plans,
+I never forgot what we were.
+I carried you in the smallest parts of my day.
+In the song I wanted to send you.
+In the thought that made me reach for my phone.
+In the empty side of the bed that made me imagine you there.
+In the quiet promise that one day, missing you would no longer be part of our routine.
+
+I have learned that real love is not only found in anniversaries.
+It lives in patience.
+It lives in forgiveness.
+It lives in choosing the same person when both hearts are tired and neither one feels particularly easy to love.
+It lives in saying, I am still here, and meaning it.
+
+So this is not only an apology for the months that slipped past us.
+It is my promise for every month still waiting ahead.
+I will celebrate you in grand ways and quiet ways.
+I will love you when life feels beautiful and when it feels unbearably ordinary.
+I will keep choosing you when everybody is watching, and especially when nobody is counting.`;
+
+const FINAL_LETTER =
+`My Chellam,
+
+Thank you for every beautiful night we shared, and even more for every difficult night you stayed.
+Thank you for loving me through tired replies, postponed calls, complicated days, and all the moments when distance tried to make us feel smaller than what we are.
+You never became less important because life became busy.
+You became the person I wanted to come back to when everything else became too much.
+
+I dream about the ordinary life waiting for us.
+Mornings where I do not have to check the time before calling you.
+Coffee going cold because we are talking too much.
+Your head on my chest while the world carries on without needing anything from us.
+Arguments that end with us trying not to smile.
+Kisses stolen in the kitchen.
+My arms around your waist while you pretend I am distracting you, even though we both know you like it.
+
+I dream about finally being close enough to love you without a screen between us.
+Close enough to kiss your forehead when you are tired.
+Close enough to pull you against me when words are not enough.
+Close enough to look into your eyes and let every missed day disappear in one long embrace.
+And yes, close enough to kiss you until you forget every kilometre that ever kept us apart.
+
+Twenty two months have taught me that you are not only the woman I miss.
+You are the woman I admire, desire, protect, tease, dream about, and choose with my entire heart.
+I do not want only the beautiful parts of you.
+I want your sleepy mornings, your stubborn moods, your laughter, your silence, your fears, your dreams, and every version of you still becoming.
+
+Through every season, every country, every delay, every flight, every difficult day, and every beautiful one,
+my answer is still the same.
+It is you.
+It has been you.
+And with everything in me, my Caramel Princess, it will always be you.`;
+
+/* =========================================================
+   BACKGROUND PARTICLE FIELD (stars + drifting gold dust)
+========================================================= */
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+let W, H, stars = [], dust = [];
+function resize(){
+  W = bgCanvas.width = window.innerWidth;
+  H = bgCanvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize); resize();
+
+function initField(){
+  stars = Array.from({length: 140}, () => ({
+    x: Math.random()*W, y: Math.random()*H, r: Math.random()*1.4+0.2,
+    a: Math.random(), speed: Math.random()*0.02+0.005
+  }));
+  dust = Array.from({length: 40}, () => ({
+    x: Math.random()*W, y: Math.random()*H, r: Math.random()*2+1,
+    vy: -(Math.random()*0.15+0.05), vx: (Math.random()-0.5)*0.08,
+    a: Math.random()*0.5+0.2, hue: Math.random()>0.5 ? '217,185,140' : '233,185,189'
+  }));
+}
+initField();
+
+let mouseX = 0.5, mouseY = 0.5;
+window.addEventListener('mousemove', e=>{
+  mouseX = e.clientX / window.innerWidth;
+  mouseY = e.clientY / window.innerHeight;
+});
+
+function drawBg(){
+  bgCtx.clearRect(0,0,W,H);
+  const grad = bgCtx.createRadialGradient(W*0.5,H*0.4,0,W*0.5,H*0.4,Math.max(W,H)*0.8);
+  grad.addColorStop(0,'#100d13'); grad.addColorStop(1,'#040305');
+  bgCtx.fillStyle = grad; bgCtx.fillRect(0,0,W,H);
+
+  const parX = (mouseX-0.5)*16, parY = (mouseY-0.5)*16;
+  stars.forEach(s=>{
+    s.a += (Math.random()-0.5)*0.02;
+    s.a = Math.max(0.15, Math.min(1, s.a));
+    bgCtx.beginPath();
+    bgCtx.fillStyle = `rgba(243,234,217,${s.a})`;
+    bgCtx.arc(s.x+parX*0.3, s.y+parY*0.3, s.r, 0, Math.PI*2);
+    bgCtx.fill();
+  });
+  dust.forEach(d=>{
+    d.x += d.vx; d.y += d.vy;
+    if(d.y < -10) d.y = H+10;
+    if(d.x < -10) d.x = W+10; if(d.x > W+10) d.x = -10;
+    bgCtx.beginPath();
+    bgCtx.fillStyle = `rgba(${d.hue},${d.a})`;
+    bgCtx.arc(d.x+parX, d.y+parY, d.r, 0, Math.PI*2);
+    bgCtx.fill();
+  });
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+
+/* =========================================================
+   FX CANVAS (heart bursts / typing hearts / petals)
+========================================================= */
+const fxCanvas = document.getElementById('fx-canvas');
+const fxCtx = fxCanvas.getContext('2d');
+function fxResize(){ fxCanvas.width = window.innerWidth; fxCanvas.height = window.innerHeight; }
+window.addEventListener('resize', fxResize); fxResize();
+
+let fxParticles = [];
+function spawnHeart(x,y,scale=1, color='233,185,189'){
+  fxParticles.push({
+    x, y, vx:(Math.random()-0.5)*1.2, vy:-(Math.random()*1.6+0.6),
+    life:1, decay:Math.random()*0.006+0.006, size:(Math.random()*10+8)*scale,
+    rot:Math.random()*Math.PI, color, type:'heart'
+  });
+}
+function spawnPetal(x,y){
+  fxParticles.push({
+    x, y, vx:(Math.random()-0.5)*1.6, vy:(Math.random()*0.6+0.3),
+    life:1, decay:Math.random()*0.004+0.003, size:Math.random()*7+5,
+    rot:Math.random()*Math.PI, color:'217,185,140', type:'petal'
+  });
+}
+function burst(cx, cy, count=120){
+  for(let i=0;i<count;i++){
+    const angle = Math.random()*Math.PI*2;
+    const speed = Math.random()*6+2;
+    fxParticles.push({
+      x:cx, y:cy, vx:Math.cos(angle)*speed, vy:Math.sin(angle)*speed - 2,
+      life:1, decay:Math.random()*0.005+0.004, size:Math.random()*12+6,
+      rot:Math.random()*Math.PI, gravity:0.06,
+      color: Math.random()>0.5?'233,185,189':'217,185,140',
+      type: Math.random()>0.4?'heart':'petal'
+    });
+  }
+}
+function romanticHeartExplosion(){
+  const cx = window.innerWidth/2, cy = window.innerHeight/2;
+  // Large, unmistakable hearts first.
+  for(let ring=0; ring<4; ring++){
+    setTimeout(()=>{
+      for(let i=0;i<34;i++){
+        const angle=(i/34)*Math.PI*2;
+        const speed=2.5+ring*1.1+Math.random()*1.5;
+        fxParticles.push({x:cx,y:cy,vx:Math.cos(angle)*speed,vy:Math.sin(angle)*speed-1.2,life:1,decay:.006,size:18+Math.random()*18,rot:0,gravity:.04,color:i%2?'233,185,189':'217,185,140',type:'heart'});
+      }
+    },ring*150);
+  }
+  const word=document.getElementById('opening-heart-word');
+  word.classList.remove('show'); void word.offsetWidth; word.classList.add('show');
+}
+
+function drawHeartShape(ctx,size){
+  ctx.beginPath();
+  const s=size/16;
+  ctx.moveTo(0, 4*s);
+  ctx.bezierCurveTo(0,-2*s, -8*s,-2*s, -8*s,4*s);
+  ctx.bezierCurveTo(-8*s,9*s, 0,13*s, 0,16*s);
+  ctx.bezierCurveTo(0,13*s, 8*s,9*s, 8*s,4*s);
+  ctx.bezierCurveTo(8*s,-2*s, 0,-2*s, 0,4*s);
+  ctx.fill();
+}
+function drawFx(){
+  fxCtx.clearRect(0,0,fxCanvas.width, fxCanvas.height);
+  fxParticles = fxParticles.filter(p=>p.life>0);
+  fxParticles.forEach(p=>{
+    p.x += p.vx; p.y += p.vy;
+    if(p.gravity) p.vy += p.gravity*0.05;
+    p.life -= p.decay;
+    p.rot += 0.01;
+    fxCtx.save();
+    fxCtx.translate(p.x,p.y);
+    fxCtx.rotate(p.rot);
+    fxCtx.globalAlpha = Math.max(0,p.life);
+    fxCtx.fillStyle = `rgba(${p.color},1)`;
+    if(p.type==='heart'){ drawHeartShape(fxCtx, p.size); }
+    else {
+      fxCtx.beginPath();
+      fxCtx.ellipse(0,0,p.size*0.6,p.size,0,0,Math.PI*2);
+      fxCtx.fill();
+    }
+    fxCtx.restore();
+  });
+  requestAnimationFrame(drawFx);
+}
+drawFx();
+
+/* =========================================================
+   INTRO TYPEWRITER
+========================================================= */
+const introText = "Some stories are not measured in days... they are measured in the number of times two hearts choose each other.";
+function typeInto(el, text, speed=42){
+  return new Promise(resolve=>{
+    el.textContent = '';
+    const cursor = document.createElement('span');
+    cursor.className='cursor';
+    let i = 0;
+    function step(){
+      if(i <= text.length){
+        el.textContent = text.slice(0,i);
+        el.appendChild(cursor);
+        i++;
+        setTimeout(step, speed + (Math.random()*30));
+      } else {
+        resolve();
+      }
+    }
+    step();
+  });
+}
+
+function showScene(id){
+  document.querySelectorAll('.scene').forEach(scene=>{
+    scene.classList.remove('active');
+    scene.scrollTop = 0;
+  });
+  const target = document.getElementById(id);
+  target.classList.add('active');
+
+  // Always open long letters at their beginning.
+  const readingPanel = target.matches('.poem-scene, #scene-final')
+    ? target.firstElementChild
+    : null;
+  if(readingPanel) readingPanel.scrollTop = 0;
+}
+
+async function runIntro(){
+  await new Promise(r=>setTimeout(r, 900));
+  await typeInto(document.getElementById('intro-text'), introText, 65);
+  await new Promise(r=>setTimeout(r, 2200));
+  document.getElementById('scene-intro').style.transition = 'opacity 1.8s ease';
+  showScene('scene-password');
+  setupPassword();
+}
+runIntro();
+
+/* =========================================================
+   PASSWORD LOGIC
+========================================================= */
+let ytPlayer = null, ytReady = false, musicStarted = false;
+
+function loadYouTubeAPI(){
+  return new Promise(resolve=>{
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    window.onYouTubeIframeAPIReady = function(){
+      ytPlayer = new YT.Player('yt-player', {
+        height:'2', width:'2', videoId: YT_VIDEO_ID,
+        playerVars:{ autoplay:0, controls:0, disablekb:1, modestbranding:1, rel:0 },
+        events:{
+          onReady:()=>{ ytReady = true; resolve(true); },
+          onError:()=>{ resolve(false); }
+        }
+      });
+    };
+    document.head.appendChild(tag);
+    setTimeout(()=> resolve(ytReady), 4000);
+  });
+}
+loadYouTubeAPI();
+
+function startMusic(){
+  if(musicStarted) return;
+  musicStarted = true;
+  try{
+    if(ytPlayer && ytReady && typeof ytPlayer.playVideo === 'function'){
+      ytPlayer.unMute();
+      ytPlayer.setVolume(70);
+      ytPlayer.playVideo();
+      // If playback fails silently, fall back after a short check
+      setTimeout(()=>{
+        try{
+          const state = ytPlayer.getPlayerState();
+          if(state !== 1){ playFallbackAudio(); }
+        }catch(e){ playFallbackAudio(); }
+      }, 1500);
+    } else {
+      playFallbackAudio();
+    }
+  }catch(e){
+    playFallbackAudio();
+  }
+}
+function playFallbackAudio(){
+  const a = document.getElementById('fallback-audio');
+  a.volume = 0.7;
+  a.play().catch(()=>{
+    document.getElementById('tap-fallback').style.display = 'inline-block';
+  });
+}
+
+function setupPassword(){
+  const input = document.getElementById('pw-input');
+  const dots = document.querySelectorAll('.pw-dot');
+  const glass = document.querySelector('#scene-password .glass');
+  const msg = document.getElementById('unlock-msg');
+  input.focus();
+  document.querySelector('#scene-password').addEventListener('click', ()=> input.focus());
+
+  input.addEventListener('input', ()=>{
+    let val = input.value.replace(/\D/g,'').slice(0,4);
+    input.value = val;
+    dots.forEach((d,i)=>{
+      d.classList.toggle('filled', i < val.length);
+    });
+    if(val.length > 0){
+      const rect = dots[val.length-1].getBoundingClientRect();
+      spawnHeart(rect.left+rect.width/2, rect.top+rect.height/2, 0.8);
+    }
+    if(val.length === 4){
+      if(val === PASSWORD){
+        msg.textContent = "Two hearts, unlocked.";
+        unlockExperience();
+      } else {
+        msg.textContent = "Not quite our dates. Try again.";
+        glass.classList.add('shake');
+        setTimeout(()=>{
+          glass.classList.remove('shake');
+          input.value=''; dots.forEach(d=>d.classList.remove('filled'));
+        }, 500);
+      }
+    }
+  });
+
+  document.getElementById('tap-fallback').addEventListener('click', ()=>{
+    document.getElementById('fallback-audio').play();
+    document.getElementById('tap-fallback').style.display='none';
+  });
+}
+
+function unlockExperience(){
+  startMusic();
+  const input = document.getElementById('pw-input');
+  input.blur();
+  setTimeout(()=>{
+    showScene('scene-title'); // will be hidden under black momentarily via css opacity timing
+    document.getElementById('scene-title').style.opacity = 0;
+    document.getElementById('scene-title').classList.remove('active');
+    // hold black
+    document.querySelectorAll('.scene').forEach(s=>s.classList.remove('active'));
+    setTimeout(()=>{
+      // heartbeat pulse cue
+      const pulse = document.createElement('div');
+      pulse.style.cssText = 'position:fixed;inset:0;z-index:40;pointer-events:none;';
+      document.body.appendChild(pulse);
+      setTimeout(()=>{
+        romanticHeartExplosion();
+        for(let i=0;i<40;i++){
+          setTimeout(()=> spawnPetal(Math.random()*window.innerWidth, -20), i*60);
+        }
+        showScene('scene-title');
+        pulse.remove();
+        setTimeout(startManualSequence, 2200);
+      }, 1300);
+    }, 900);
+  }, 700);
+}
+
+/* =========================================================
+   BUILD PHOTO SCENES
+========================================================= */
+const photoHolder = document.getElementById('photo-scene-holder');
+const revealStyles = ['zoom','float','light','burn','reflect'];
+for(let i=1;i<=PHOTO_COUNT;i++){
+  const scene = document.createElement('div');
+  scene.className = 'scene photo-scene';
+  scene.id = 'scene-photo-'+i;
+  const tilt = (Math.random()*8-4).toFixed(1);
+  scene.innerHTML = `
+    <div class="photo-frame" style="--tilt:${tilt}deg;">
+      <img src="photo${i}.jpg" alt="Memory ${i}" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph-placeholder',innerHTML:'Photo ${i}'}))">
+    </div>
+    <div class="caption-text">${CAPTIONS[i-1]}</div>
+  `;
+  photoHolder.appendChild(scene);
+}
+
+const interludeHolder = document.getElementById('interlude-scene-holder');
+INTERLUDES.forEach((item,index)=>{
+  const scene=document.createElement('div');
+  scene.className='scene interlude-scene';
+  scene.id='scene-interlude-'+item.id;
+  const extras = item.effect==='kisses'
+    ? '<span class="floating-kiss" style="left:9%;top:16%">💋</span><span class="floating-kiss" style="right:10%;bottom:14%;animation-delay:1.2s">♥</span>'
+    : item.effect==='orbit'
+      ? '<div class="orbit-wrap"><span class="orbit-heart" style="animation-delay:-2s">♥</span><span class="orbit-heart" style="animation-delay:-5s">✦</span></div>'
+      : '<div class="love-meter"><span></span></div>';
+  scene.innerHTML=`<div class="interlude-card">${extras}<div class="interlude-kicker">${item.kicker}</div><div class="interlude-text">${item.text}</div><div class="interlude-note">${item.note}</div></div>`;
+  interludeHolder.appendChild(scene);
+});
+
+/* Forever gallery mini frames */
+const foreverGallery = document.getElementById('forever-gallery');
+for(let i=1;i<=PHOTO_COUNT;i++){
+  const angle = (i/PHOTO_COUNT)*Math.PI*2;
+  const radius = 32;
+  const top = 50 + Math.sin(angle)*radius;
+  const left = 50 + Math.cos(angle)*radius*1.3;
+  const frame = document.createElement('div');
+  frame.className='forever-frame';
+  frame.style.top = top+'%';
+  frame.style.left = left+'%';
+  frame.style.setProperty('--r', (Math.random()*10-5)+'deg');
+  frame.style.animationDelay = (Math.random()*6)+'s';
+  frame.innerHTML = `<img src="photo${i}.jpg" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'ph-placeholder'}))">`;
+  foreverGallery.appendChild(frame);
+}
+
+/* =========================================================
+   CONSTELLATION (stars forming a heart)
+========================================================= */
+function buildConstellation(){
+  const svg = document.getElementById('const-svg');
+  svg.setAttribute('viewBox','0 0 400 400');
+  svg.innerHTML = '';
+  const pts = [];
+  for(let t=0; t<Math.PI*2; t+=0.35){
+    const x = 200 + 16*Math.pow(Math.sin(t),3)*6;
+    const y = 200 - (13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t))*6;
+    pts.push([x,y]);
+  }
+  pts.forEach((p,i)=>{
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx', Math.random()*400);
+    c.setAttribute('cy', Math.random()*400);
+    c.setAttribute('r', 2.4);
+    c.setAttribute('fill', '#f3ead9');
+    c.classList.add('const-twinkle');
+    c.style.animationDelay = `${(i%7)*0.18}s`;
+    c.style.transition = `cx 2.2s ease ${i*0.04}s, cy 2.2s ease ${i*0.04}s, opacity 2s ease`;
+    svg.appendChild(c);
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        c.setAttribute('cx', p[0]);
+        c.setAttribute('cy', p[1]);
+      }, 50);
+    });
+    if(i < pts.length-1){
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', p[0]); line.setAttribute('y1', p[1]);
+      line.setAttribute('x2', pts[i+1][0]); line.setAttribute('y2', pts[i+1][1]);
+      line.setAttribute('stroke', 'rgba(217,185,140,0.35)');
+      line.setAttribute('stroke-width','1');
+      line.style.opacity = 0;
+      line.style.transition = `opacity 1.5s ease ${1.5 + i*0.04}s`;
+      svg.appendChild(line);
+      requestAnimationFrame(()=> setTimeout(()=> line.style.opacity = 1, 50));
+    }
+  });
+}
+
+/* =========================================================
+   DISTANCE -> HEARTBEAT ANIMATION
+========================================================= */
+function animateDistance(){
+  const line=document.getElementById('dist-line');
+  const heartbeat=document.getElementById('heartbeat-line');
+  const plane=document.getElementById('plane-group');
+  const path=document.getElementById('flight-path');
+  line.style.transition='none'; line.setAttribute('stroke-dashoffset','760');
+  heartbeat.style.transition='none'; heartbeat.setAttribute('stroke-dashoffset','250');
+  plane.style.opacity='0';
+  requestAnimationFrame(()=>{
+    line.style.transition='stroke-dashoffset 2.6s ease';
+    line.setAttribute('stroke-dashoffset','0');
+    heartbeat.style.transition='stroke-dashoffset 1.6s ease 1.2s';
+    heartbeat.setAttribute('stroke-dashoffset','0');
+  });
+  const total=path.getTotalLength();
+  const started=performance.now()+500;
+  function fly(now){
+    const progress=Math.max(0,Math.min(1,(now-started)/5200));
+    const eased=progress<.5?2*progress*progress:1-Math.pow(-2*progress+2,2)/2;
+    const point=path.getPointAtLength(total*eased);
+    const ahead=path.getPointAtLength(Math.min(total,total*eased+2));
+    const angle=Math.atan2(ahead.y-point.y,ahead.x-point.x)*180/Math.PI;
+    plane.setAttribute('transform',`translate(${point.x} ${point.y}) rotate(${angle})`);
+    plane.style.opacity=progress>0?.95:0;
+    if(progress<1) requestAnimationFrame(fly);
+  }
+  requestAnimationFrame(fly);
+  for(let i=0;i<18;i++) setTimeout(()=>spawnHeart(window.innerWidth*.5+(Math.random()-.5)*120,window.innerHeight*.46+(Math.random()-.5)*50,.55),1300+i*90);
+}
+
+/* =========================================================
+   TYPE POEMS WHEN THEIR SCENE ACTIVATES
+========================================================= */
+async function typePoem(id, text){
+  const el = document.getElementById(id);
+  await typeInto(el, text, 20);
+}
+
+/* =========================================================
+   MASTER MANUAL SEQUENCE
+   The reader decides when to continue. Long text scenes finish
+   typing before the Next button becomes available.
+========================================================= */
+function cuteInterludeBurst(sceneId){
+  const target=document.getElementById(sceneId);
+  const rect=target.getBoundingClientRect();
+  for(let i=0;i<24;i++) setTimeout(()=>spawnHeart(rect.width*(.25+Math.random()*.5),rect.height*(.58+Math.random()*.18),.55+Math.random()*.35),i*55);
+}
+
+const SEQUENCE = [];
+for(let i=1;i<=PHOTO_COUNT;i++){
+  SEQUENCE.push({ id:'scene-photo-'+i });
+  if(i===1) SEQUENCE.push({id:'scene-interlude-tease1', onEnter:()=>cuteInterludeBurst('scene-interlude-tease1')});
+  if(i===2) SEQUENCE.push({id:'scene-interlude-play1', onEnter:()=>cuteInterludeBurst('scene-interlude-play1')});
+  if(i===3) SEQUENCE.push({id:'scene-interlude-tease3', onEnter:()=>cuteInterludeBurst('scene-interlude-tease3')});
+  if(i===4){ SEQUENCE.push({ id:'scene-poem1', onEnter: ()=>typePoem('poem1-text', POEM_1) }); }
+  if(i===4) SEQUENCE.push({id:'scene-interlude-sensual1', onEnter:()=>cuteInterludeBurst('scene-interlude-sensual1')});
+  if(i===5) SEQUENCE.push({id:'scene-interlude-tease2', onEnter:()=>cuteInterludeBurst('scene-interlude-tease2')});
+  if(i===6) SEQUENCE.push({id:'scene-interlude-sensual3', onEnter:()=>cuteInterludeBurst('scene-interlude-sensual3')});
+  if(i===7){ SEQUENCE.push({ id:'scene-distance', onEnter: animateDistance }); }
+  if(i===7){ SEQUENCE.push({ id:'scene-poem2', onEnter: ()=>typePoem('poem2-text', POEM_2) }); }
+  if(i===8) SEQUENCE.push({id:'scene-interlude-soft1', onEnter:()=>cuteInterludeBurst('scene-interlude-soft1')});
+  if(i===9) SEQUENCE.push({id:'scene-interlude-play2', onEnter:()=>cuteInterludeBurst('scene-interlude-play2')});
+  if(i===10) SEQUENCE.push({id:'scene-interlude-sensual2', onEnter:()=>cuteInterludeBurst('scene-interlude-sensual2')});
+  if(i===11) SEQUENCE.push({id:'scene-interlude-vow1', onEnter:()=>cuteInterludeBurst('scene-interlude-vow1')});
+}
+SEQUENCE.push({ id:'scene-constellation', onEnter: buildConstellation });
+SEQUENCE.push({ id:'scene-poem3', onEnter: ()=>typePoem('poem3-text', POEM_3) });
+SEQUENCE.push({ id:'scene-final', onEnter: async ()=>{
+  burst(window.innerWidth/2, window.innerHeight*0.25, 40);
+  await typePoem('final-letter-text', FINAL_LETTER);
+}});
+SEQUENCE.push({ id:'scene-forever', onEnter: ()=>{
+  if(!window.foreverPetals){
+    window.foreverPetals = setInterval(()=> spawnPetal(Math.random()*window.innerWidth, -10), 700);
+  }
+}});
+
+let currentSceneIndex = -1;
+let sceneIsLoading = false;
+let ambientSprinkle = null;
+const visitedScenes = new Set();
+
+function buildProgressRail(){
+  const rail = document.getElementById('progress-rail');
+  rail.innerHTML = '';
+  SEQUENCE.forEach(()=> rail.appendChild(document.createElement('span')));
+}
+buildProgressRail();
+
+function updateNavigation(){
+  const prev = document.getElementById('prev-btn');
+  const next = document.getElementById('next-btn');
+  const counter = document.getElementById('scene-counter');
+  const isLast = currentSceneIndex === SEQUENCE.length - 1;
+
+  prev.disabled = sceneIsLoading || currentSceneIndex <= 0;
+  next.disabled = sceneIsLoading || isLast;
+  next.textContent = isLast ? 'Forever ♥' : (sceneIsLoading ? 'Reading…' : 'Next →');
+  counter.textContent = `${currentSceneIndex + 1} / ${SEQUENCE.length}`;
+
+  document.querySelectorAll('#progress-rail span').forEach((dot, index)=>{
+    dot.classList.toggle('done', index <= currentSceneIndex);
+    dot.classList.toggle('current', index === currentSceneIndex);
+  });
+}
+
+async function goToScene(index){
+  if(sceneIsLoading || index < 0 || index >= SEQUENCE.length) return;
+  sceneIsLoading = true;
+  currentSceneIndex = index;
+  updateNavigation();
+
+  if(ambientSprinkle) clearInterval(ambientSprinkle);
+  const step = SEQUENCE[index];
+  showScene(step.id);
+
+  ambientSprinkle = setInterval(()=>{
+    if(Math.random()>0.5) spawnPetal(Math.random()*window.innerWidth, -10);
+    else spawnHeart(Math.random()*window.innerWidth, window.innerHeight+10, 0.9);
+  }, 1300);
+
+  // Run one-time entrance animations only the first time a scene is visited.
+  if(step.onEnter && !visitedScenes.has(step.id)){
+    visitedScenes.add(step.id);
+    try{ await step.onEnter(); } catch(error){ console.error(error); }
+  }
+
+  sceneIsLoading = false;
+  updateNavigation();
+}
+
+function startManualSequence(){
+  document.getElementById('story-controls').classList.add('visible');
+  goToScene(0);
+}
+
+document.getElementById('next-btn').addEventListener('click', ()=> goToScene(currentSceneIndex + 1));
+document.getElementById('prev-btn').addEventListener('click', ()=> goToScene(currentSceneIndex - 1));
+
+// Optional keyboard navigation for desktop users.
+document.addEventListener('keydown', event=>{
+  if(!document.getElementById('story-controls').classList.contains('visible')) return;
+  if(event.key === 'ArrowRight' || event.key === 'Enter') goToScene(currentSceneIndex + 1);
+  if(event.key === 'ArrowLeft') goToScene(currentSceneIndex - 1);
+});
+
+</script>
+</body>
+</html>
